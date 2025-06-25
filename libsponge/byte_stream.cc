@@ -1,5 +1,6 @@
 #include "byte_stream.hh"
-#include <queue>
+#include <deque>
+#include <iostream>
 #include "string.h"
 
 // Dummy implementation of a flow-controlled in-memory byte stream.
@@ -14,8 +15,10 @@ void DUMMY_CODE(Targs &&... /* unused */) {}
 
 using namespace std;
 
-ByteStream::ByteStream(const size_t capacity) {
-    this->capacity = capacity;
+ByteStream::ByteStream(const size_t in_capacity)
+    :byte_stream(std::deque<char>(in_capacity)), capacity(in_capacity)
+{
+    byte_stream.clear();
 }
 
 size_t ByteStream::write(const string &data) {
