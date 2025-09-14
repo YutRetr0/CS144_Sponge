@@ -1,4 +1,5 @@
 #include "stream_reassembler.hh"
+#include <cstddef>
 #include <cstdint>
 #include <iterator>
 #include <iostream>
@@ -94,3 +95,15 @@ size_t StreamReassembler::unassembled_bytes() const {
 bool StreamReassembler::empty() const {
     return _output.buffer_empty() && unassembled_bytes() == size_t(0);
 }
+
+size_t StreamReassembler::get_assembled_idx() const {
+    std::cout << "unbase " << unass_base << endl;
+    if (_output.input_ended()) return unass_base + 1;
+    return unass_base;
+}
+
+size_t StreamReassembler::get_acceptable_size() const {
+    if (_output.input_ended()) return 0;
+    return _capacity - _output.buffer_size();
+}
+
