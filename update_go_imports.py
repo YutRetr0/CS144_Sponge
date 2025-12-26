@@ -16,6 +16,7 @@ import re
 from typing import Iterable, List, Optional, Set, Tuple
 
 TEST_PATH = "git.woa.com/sn/servergroup/apitest/test"
+APITEST_ROOT_PATH = "git.woa.com/sn/servergroup/apitest"
 FORMATTER_PATH = "git.woa.com/sn/servergroup/apitest/formatter"
 MATCHER_PATH = "git.woa.com/sn/servergroup/apitest/matcher"
 NEW_PATH = "sn/test/internal/testing"
@@ -78,6 +79,17 @@ def _process_import_block(lines: List[str]) -> Tuple[List[str], Set[str], bool, 
             changed = True
             continue
 
+        if path == APITEST_ROOT_PATH:
+            if alias == ".":
+                new_body.append(f'{indent}. "{NEW_PATH}"{rest}')
+            else:
+                ensure_sntest = True
+                aliases_to_replace.add(effective_alias)
+                new_body.append(f'{indent}{NEW_ALIAS} "{NEW_PATH}"{rest}')
+                added_sntest = True
+            changed = True
+            continue
+
         if path in {FORMATTER_PATH, MATCHER_PATH}:
             if alias != ".":
                 ensure_sntest = True
@@ -118,6 +130,17 @@ def _process_single_import(
         return line, aliases_to_replace, False, True
 
     if path == TEST_PATH:
+        if alias == ".":
+            return f'{indent}import . "{NEW_PATH}"{rest}', aliases_to_replace, True, False
+        aliases_to_replace.add(alias or _default_alias(path))
+        return (
+            f'{indent}import {NEW_ALIAS} "{NEW_PATH}"{rest}',
+            aliases_to_replace,
+            True,
+            True,
+        )
+
+    if path == APITEST_ROOT_PATH:
         if alias == ".":
             return f'{indent}import . "{NEW_PATH}"{rest}', aliases_to_replace, True, False
         aliases_to_replace.add(alias or _default_alias(path))
